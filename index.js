@@ -46,6 +46,8 @@ io.on('connection', function(socket){
         socket.player.x = data.x;
         socket.player.y = data.y;
         io.emit('move',socket.player);
+
+        
       });
 
       //el callback de 'disconnect' se registra acá, dentro del 
@@ -56,6 +58,11 @@ io.on('connection', function(socket){
         console.log('user disconnected');
         io.emit('remove', socket.player.id);
       });
+
+      socket.on('player_move', function(moveplayerData){
+        socket.broadcast.emit('movePlayer', socket.player)
+      });
+      
   });
 
 });

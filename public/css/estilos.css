@@ -4,5 +4,9 @@ body{
 
 #game{
 	
-	background-image:url("/assets/cuadricula.png");
 }	
+
+canvas { 
+	background-image:url("/assets/cuadricula.png");
+	border: 5px solid black;
+}

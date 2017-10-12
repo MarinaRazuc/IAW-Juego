@@ -11,23 +11,15 @@ var comida;
 var jugadores=0;
 var scaleRatio = window.devicePixelRatio / 3;
 
-
-//var game = new Phaser.Game(24*32, 17*32, Phaser.AUTO, document.getElementById('game'));
-//var game = new Phaser.Game(width, height, /*Phaser.CANVAS*/ Phaser.AUTO,  /*null*/ document.getElementById('game'), 
-//		{	preload: preload, 
-//			create: create, 
-//			update: update
-//		});
-
-//game.state.add('Game',Game);
-//game.state.start('Game');
-
 var Game={};
+
+//the enemy player list 
+var enemies = [];
 
 //No obligatorio, pero útil, ya que mantendrá al juego reactivo a los mensajes del servidor 
 //incluso cuando la ventana del juego no esté en foco 
 Game.init=function(){
-	game.stage.disableVisibilityChange=false;//estaba en true
+	game.stage.disableVisibilityChange=true;//estaba en true
 //	game.physics.arcade.setBoundsToWorld(false, false, false, false, false)
 };
 
@@ -35,8 +27,6 @@ Game.init=function(){
  Game.preload=function(){
 	
 	//cargar assets
-	//game.stage.backgroundColor = '7D7A79';
-//game.load.image('background', '/assets/cuadricula.png');
 
 	game.load.image('violet_player', '/assets/circulo_violeta.png');
 	game.load.image('orange_player', '/assets/circulo_naranja.png');
@@ -68,7 +58,7 @@ Game.create=function() {
     Game.playerMap={};
     Game.scores={};
 
-    console.log("width y height ", width, ", ", height);
+   // console.log("width y height ", width, ", ", height);
 	//Make the world larger than the actual canvas
     this.game.world.setBounds(-100, -100, 2000, 2000);
 
@@ -84,17 +74,6 @@ Game.create=function() {
 };
 
 Game.update=function(){
-
-/*var pointer = game.input.mousePointer;
-	if (distanceToPointer(player, pointer) <= 50) {
-		//The player can move to mouse pointer at a certain speed. 
-		//look at player.js on how this is implemented.
-		movetoPointer(player, 0, pointer, 100);
-	} else {
-		movetoPointer(player, 500, pointer);
-	}
-
-*/
 
 	var xpos=game.input.mousePointer.x;
 	var ypos=game.input.mousePointer.y;
@@ -152,17 +131,7 @@ Game.movePlayer=function(id,x,y){
 	var player=Game.playerMap[id]; //línea que no permite que los jugadores se pisen
 	this.game.camera.follow(player);
 	
-	/*if(player!=null){
-		player.worldX=x;
-		player.worldY=y;
-
-
-		//console.log("DENTRO DEL PRIMER IF");
-	}*/
 	if(player!=null){
-
-		//console.log("DENTRO DEL SEGUNDO IF");
-
 		if(game.physics.arcade.distanceToPointer(game.input.activePointer)>5){
 			//  The maxTime parameter lets you control how fast it will arrive at the Pointer coords
 			game.physics.arcade.moveToPointer(player, 200);
@@ -171,10 +140,24 @@ Game.movePlayer=function(id,x,y){
 			player.body.velocity.set(0);
 		}
 	}
+
+
+
+	Client.emitMovement({id, x, y});
+
 	
 };
 
+Game.actualizarPos=function(id, x, y){
+	var player=Game.playerMap[id];
 
+	console.log("id: ", id, " ","x e y ", x, ", ", y);
+
+	if(player!=null){
+		player.worldX=x;
+		player.worldY=y;
+	}
+};
 
 /* Crea un nuevo sprite en las coordenadas especificadas, y almacena el correspondiente objeto sprite
 	en un arreglo asociativo declarado en Game.create(), con el id dado como la clave (key).
@@ -192,25 +175,18 @@ Game.addNewPlayer=function(id,x,y){
 	switch(id){
 		case 0: {	color='orange_player';
 					orange_food = game.add.group();
-
-
+					
 					for (var i = 0; i < 60; i++) {
 						a=Math.random(2);
 						b=Math.random(2);
 						orange_food.create(width*a, height*b, 'orange_food');
-						
 					}
-
 
 					for (var i in orange_food.children) {
 						orange_food.children[i].anchor.set(0.3);
 					}
 
 					game.physics.arcade.enable(orange_food, Phaser.Physics.ARCADE);
-					comida=orange_food;
-					
-			//		Game.food[0]=orange_food;
-					 
 					break;
 				}
 		case 1: {	color='violet_player';
@@ -220,13 +196,7 @@ Game.addNewPlayer=function(id,x,y){
 						a=Math.random(2);
 						b=Math.random(2);
 						violet_food.create(width*a, height*b, 'violet_food');
-						
 					}
-
-				
-					comida=violet_food;
-
-					//violet_food.scale.setTo(scaleRatio, scaleRatio);
 
 					for (var i in violet_food.children) {
 						violet_food.children[i].anchor.set(0.3);
@@ -243,10 +213,7 @@ Game.addNewPlayer=function(id,x,y){
 						b=Math.random(2);
 						yellow_food.create(width*a, height*b, 'yellow_food');
 					}
-
-				
-					comida=yellow_food;
-
+					
 					for (var i in yellow_food.children) {
 						yellow_food.children[i].anchor.set(0.3);
 					}
@@ -265,9 +232,6 @@ Game.addNewPlayer=function(id,x,y){
 						
 					}
 
-				
-					comida=red_food;
-
 					for (var i in red_food.children) {
 						red_food.children[i].anchor.set(0.3);
 					}
@@ -285,8 +249,6 @@ Game.addNewPlayer=function(id,x,y){
 						
 					}
 				
-					comida=green_food;
-
 					for (var i in green_food.children) {
 						green_food.children[i].anchor.set(0.3);
 					}
@@ -296,8 +258,6 @@ Game.addNewPlayer=function(id,x,y){
 				}
 		case 5: {	color='blue_player';
 					blue_food = game.add.group();
-
-
 					for (var i = 0; i < 60; i++) {
 						a=Math.random(2);
 						b=Math.random(2);
@@ -305,8 +265,6 @@ Game.addNewPlayer=function(id,x,y){
 						
 					}
 				
-					comida=blue_food;
-
 					for (var i in blue_food.children) {
 						blue_food.children[i].anchor.set(0.3);
 						//podria ser random 
@@ -324,11 +282,6 @@ Game.addNewPlayer=function(id,x,y){
 						pink_food.create(width*a, height*b, 'pink_food');
 						
 					}
-				
-					comida=pink_food;
-
-
-
 					for (var i in pink_food.children) {
 						pink_food.children[i].anchor.set(0.3);
 						//podria ser random 
@@ -383,13 +336,14 @@ function render() {
  
  
 Game.removePlayer=function(id){
-    Game.playerMap[id].destroy();
+    var player=Game.playerMap[id].destroy();
     delete Game.playerMap[id];
   //  delete Game.food[id];
-   
+  // enemies.splice(enemies.indexOf(player), 1);
 };
 
 
 function randomInt(low, high){
   return Math.floor(Math.random() *(high-low) +low);
 };
+
