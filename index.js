@@ -27,6 +27,7 @@ http.lastPlayderID=0;
 io.on('connection', function(socket){
   console.log('a user connected, ID: ', http.lastPlayderID);
 
+  sleepFor(Math.random(10,1000)); //a ver si se soluciona el cannot set property
   //socket.on: permite especificar callbacks para manejar diferentes mensajes
   socket.on('newplayer', function(){
     var idp=http.lastPlayderID&7;
@@ -39,16 +40,18 @@ io.on('connection', function(socket){
       };
       //le enviamos al jugador la lista de los jugadores conectados
       socket.emit('allplayers', getAllPlayers());
+      // socket.emit('allfood', getAllFood()); //????????????????????????????
       socket.broadcast.emit('newplayer', socket.player);
+ //     socket.broadcast.emit('newfood', socket.food); //???????????????????
       
       socket.on('moverJugador',function(data){
        // console.log('click to '+data.x+', '+data.y);
         socket.player.x = data.x;
         socket.player.y = data.y;
         io.emit('move',socket.player);
+    //    socket.broadcast.emit('movePlayer', socket.player); //enviar pos a los demas jugadores
 
-        
-      });
+       });
 
       //el callback de 'disconnect' se registra acá, dentro del 
       // callback de 'newplayer', si esto no es así, y de alguna 
@@ -79,11 +82,25 @@ function getAllPlayers(){
   return players;
 };
 
+function getAllFood(){
+  var food=[];
+  Object.keys(io.sockets.connected).forEach(function(socketID){
+    var player=io.sockets.connected[socketID].player;
+    if(player){
+      food.push(Game.foodMap[player.id]);
+    }
+  });
+  return food;
+};
+
 function randomInt(low, high){
   return Math.floor(Math.random() *(high-low) +low);
 };
 
-
+function sleepFor( sleepDuration ){
+    var now = new Date().getTime();
+    while(new Date().getTime() < now + sleepDuration){ /* do nothing */ } 
+}
 
 
  

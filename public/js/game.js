@@ -57,6 +57,7 @@ Game.create=function() {
 	// para trackear a los jugadores
     Game.playerMap={};
     Game.scores={};
+    Game.foodMap={};
 
    // console.log("width y height ", width, ", ", height);
 	//Make the world larger than the actual canvas
@@ -77,51 +78,39 @@ Game.update=function(){
 
 	var xpos=game.input.mousePointer.x;
 	var ypos=game.input.mousePointer.y;
-	//console.log("en update--> xpos e ypos: ", xpos, ypos);
-	Client.moverJugador(xpos,ypos);
-
 
 	for(i=0; i<7; i++){
 		if(Game.playerMap[i]!=null){
 			switch(i){
 				case 6:{
-					//console.log("SIETE");
 					game.physics.arcade.overlap(Game.playerMap[6], pink_food, eatFood); //Game.playerMap[6]
 					break;
-				}
-				case 5:{
-					//console.log("SEIS");
+				}case 5:{
 					game.physics.arcade.overlap(Game.playerMap[5], blue_food, eatFood);
 					break;
-				}
-				case 4:{
-					//console.log("CINCO");
+				}case 4:{
 					game.physics.arcade.overlap(Game.playerMap[4], green_food, eatFood);
 					break;
-				}
-				case 3:{
-					//console.log("CUATRO");
+				}case 3:{
 					game.physics.arcade.overlap(Game.playerMap[3], red_food, eatFood);
 					break;
-				}
-				case 2:{
-					//console.log("TRES");
+				}case 2:{
 					game.physics.arcade.overlap(Game.playerMap[2], yellow_food, eatFood);
 					break;
-				}
-				case 1:{
-					//console.log("DOS");
+				}case 1:{
 					game.physics.arcade.overlap(Game.playerMap[1], violet_food, eatFood);
 					break;
-				}
-				case 0:{
-					//console.log("UNO");
+				}case 0:{
 					game.physics.arcade.overlap(Game.playerMap[0], orange_food, eatFood);
 					break;
 				}
 			}
 		}
 	}
+
+//	console.log("en update--> xpos e ypos: ", xpos, ypos);
+	Client.moverJugador(xpos,ypos);
+	
 };
 
 
@@ -135,27 +124,29 @@ Game.movePlayer=function(id,x,y){
 		if(game.physics.arcade.distanceToPointer(game.input.activePointer)>5){
 			//  The maxTime parameter lets you control how fast it will arrive at the Pointer coords
 			game.physics.arcade.moveToPointer(player, 200);
-			
 		}else{
 			player.body.velocity.set(0);
 		}
 	}
 
 
+	var XX = player.x;
+	var YY = player.y;
 
-	Client.emitMovement({id, x, y});
+//	console.log("ID, worldX, worldY: ", id, ", ", XX, ", ", YY);
+	Client.emitMovement({id, XX, YY});
 
 	
 };
 
 Game.actualizarPos=function(id, x, y){
-	var player=Game.playerMap[id];
+	var player=Game.playerMap[id]; //problemas --> cannot read property 'id' of undefined
 
-	console.log("id: ", id, " ","x e y ", x, ", ", y);
-
+//	console.log("ACTUALIZAR POS:  id: ", id, " ","x e y ", x, ", ", y);
+	//pos llegan perfecto, no se como asignarlas ni a que
 	if(player!=null){
-		player.worldX=x;
-		player.worldY=y;
+		player.x=x;
+		player.y=y;
 	}
 };
 
@@ -180,6 +171,7 @@ Game.addNewPlayer=function(id,x,y){
 						a=Math.random(2);
 						b=Math.random(2);
 						orange_food.create(width*a, height*b, 'orange_food');
+						//Client.setFood({id, width*a, height*b});
 					}
 
 					for (var i in orange_food.children) {
@@ -187,6 +179,9 @@ Game.addNewPlayer=function(id,x,y){
 					}
 
 					game.physics.arcade.enable(orange_food, Phaser.Physics.ARCADE);
+					
+					Game.foodMap[id]=orange_food;//Uncaught TypeError: Cannot set property '0' of undefined
+
 					break;
 				}
 		case 1: {	color='violet_player';
