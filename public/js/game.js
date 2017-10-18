@@ -20,7 +20,6 @@ var enemies = [];
 //incluso cuando la ventana del juego no esté en foco 
 Game.init=function(){
 	game.stage.disableVisibilityChange=true;//estaba en true
-//	game.physics.arcade.setBoundsToWorld(false, false, false, false, false)
 };
 
 
@@ -140,13 +139,13 @@ Game.movePlayer=function(id,x,y){
 };
 
 Game.actualizarPos=function(id, x, y){
-	var player=Game.playerMap[id]; //problemas --> cannot read property 'id' of undefined
+	var moveplayer=Game.playerMap[id]; //problemas --> cannot read property 'id' of undefined
 
 //	console.log("ACTUALIZAR POS:  id: ", id, " ","x e y ", x, ", ", y);
 	//pos llegan perfecto, no se como asignarlas ni a que
-	if(player!=null){
-		player.x=x;
-		player.y=y;
+	if(moveplayer!=null){
+		moveplayer.x=x;
+		moveplayer.y=y;
 	}
 };
 
